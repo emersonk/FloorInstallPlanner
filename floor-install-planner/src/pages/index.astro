@@ -44,7 +44,7 @@ try {
             <span style="display:inline-block;width:1em;height:1em;background:#ffe082;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Cut Plank
             <span style="display:inline-block;width:1em;height:1em;background:#ff8a80;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Cut Too Short
             <span style="display:inline-block;width:1em;height:1em;background:#ce93d8;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Too Narrow (First/Last Row)
-            <span style="display:inline-block;width:1em;height:1em;background:#ffb74d;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Joint Too Close
+            <span style="display:inline-block;width:1em;height:1em;background:#ffe082;border:2px dashed #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Cut for Butt Joint (dashed border)
             <span style="display:inline-block;width:1em;height:1em;background:#eee;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Expansion Gap
           </div>
           {(() => {
@@ -90,18 +90,14 @@ try {
                     let bg = "#fff";
                     let label = "";
                     let tooltip = "";
-                    if (cell.too_close_butt_joint) {
-                      bg = "#ffb74d"; // orange for joint too close
-                      label = "Joint Too Close";
-                      tooltip = "Butt joint offset violated";
-                    } else if (cell.too_narrow) {
+                    if (cell.too_narrow) {
                       bg = "#ce93d8"; // purple for too narrow
                       label = "Too Narrow";
                       tooltip = "First/Last row too narrow";
                     } else if (cell.type === "full") {
                       bg = "#b3e5fc";
                       label = "";
-                      tooltip = "Full plank";
+                      tooltip = `Full plank (${cell.length_mm}mm x ${cell.width_mm}mm)`;
                     } else if (cell.type === "cut") {
                       if (cell.too_short) {
                         bg = "#ff8a80"; // red for too short
@@ -117,14 +113,29 @@ try {
                       label = "";
                       tooltip = "Expansion gap";
                     }
+
+                    // Dashed border for planks cut for butt joint compliance
+                    let borderStyle = "1px solid #333";
+                    if (cell.cut_for_butt_joint) {
+                      borderStyle = "2px dashed #333";
+                      tooltip += " (cut for butt joint compliance)";
+                    }
+
+                    // Show dimensions inside the cell
+                    let dimLabel = "";
+                    if (cell.type === "full" || cell.type === "cut") {
+                      dimLabel = `${cell.length_mm}×${cell.width_mm}`;
+                    }
+
                     return (
                       <div
                         style={`
                           min-width: 10px;
                           min-height: 10px;
                           background: ${bg};
-                          border: 1px solid #333;
+                          border: ${borderStyle};
                           display: flex;
+                          flex-direction: column;
                           align-items: center;
                           justify-content: center;
                           font-size: 0.7em;
@@ -132,7 +143,8 @@ try {
                         `}
                         title={tooltip}
                       >
-                        {label}
+                        <span>{label}</span>
+                        <span style="font-size:0.8em;color:#222;">{dimLabel}</span>
                       </div>
                     );
                   })
