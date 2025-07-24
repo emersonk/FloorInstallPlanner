@@ -6,18 +6,19 @@ Tracks current work focus, recent changes, next steps, active decisions, importa
 ---
 
 ### Current Work Focus
-Implementing and refining the flooring layout visualization. Ensuring the grid accurately reflects input parameters and constraints, and is clear and user-friendly.
+Finalizing and validating all core installation constraints in the visualization. Ensuring the grid highlights violations of minimum plank length, minimum first/last row width, and minimum butt joint offset.
 
 ### Recent Changes
-- Implemented TypeScript engine to output a grid of planks and expansion gaps.
-- Added color-coded, labeled CSS grid visualization in Astro.
-- Verified visualization renders correctly with legend and input parameters.
+- Implemented and visualized minimum plank length constraint ("Too Short").
+- Implemented and visualized minimum first/last row width constraint ("Too Narrow").
+- Implemented and visualized minimum butt joint offset constraint ("Joint Too Close").
+- Updated legend and color-coding for all constraints.
 
 ### Next Steps
-- Document the visualization approach and grid structure in systemPatterns.md.
-- Update progress.md to reflect the completed visualization milestone.
-- Plan and implement additional constraints (e.g., butt joint offset, min plank length).
-- Consider enhancements: interactivity, exporting cut lists, improved styling.
+- Update systemPatterns.md and progress.md to document the completed constraint logic and visualization.
+- Review and refactor code for clarity and maintainability.
+- Add or improve tooltips, labels, and summary statistics if desired.
+- Plan for further enhancements or testing as needed.
 - Continue to update memory bank files as work progresses.
 
 ### Active Decisions & Considerations

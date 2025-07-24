@@ -10,17 +10,18 @@ Tracks what works, what's left to build, current status, known issues, and the e
 - Memory bank documentation structure is in place.
 - TypeScript engine outputs a grid of planks and expansion gaps.
 - Color-coded, labeled CSS grid visualization is live and matches input parameters.
+- All core installation constraints (min plank length, min first/last row width, min butt joint offset) are implemented and visualized.
 
 ### What's Left to Build
-- Implement additional installation constraints (e.g., butt joint offset, min plank length, min first/last row width).
-- Enhance visualization: improved styling.
-- Document visualization approach and grid structure in systemPatterns.md.
+- Review and refactor code for clarity and maintainability.
+- Add or improve tooltips, labels, and summary statistics if desired.
+- Document completed constraint logic and visualization in systemPatterns.md.
 - Continue to update memory bank and documentation as features are added.
 
 ### Current Status
-- Visualization milestone complete: grid renders with correct color-coding and legend.
-- Input parameters are parsed and displayed; grid structure matches room and plank dimensions.
-- Ready to implement more advanced layout logic and user-facing features.
+- All core installation constraints are implemented and visualized in the grid.
+- Visualization highlights violations of min plank length, min first/last row width, and min butt joint offset.
+- Project is ready for code review, refactoring, and further enhancements or testing.
 
 ### Known Issues
 - None at this stage.

@@ -25,6 +25,9 @@ export interface PlankCell {
   length_mm: number;
   width_mm: number;
   is_end_cut?: boolean;
+  too_short?: boolean; // Indicates if the cut is below the minimum plank length
+  too_narrow?: boolean; // Indicates if the row is below the minimum first/last row width
+  too_close_butt_joint?: boolean; // Indicates if butt joint offset is violated
 }
 
 export interface FloorPlanGrid {
@@ -91,8 +94,14 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
 
   // Build grid
   const cells: PlankCell[][] = [];
+  // Track butt joint positions for each row (excluding expansion gap border)
+  const butt_joints_by_row: number[][] = [];
+
   for (let r = 0; r < total_rows; r++) {
     const row: PlankCell[] = [];
+    // Track butt joint positions (in mm from left wall) for this row
+    const butt_joints: number[] = [];
+
     for (let c = 0; c < total_cols; c++) {
       // Expansion gap border
       if (r === 0 || r === total_rows - 1 || c === 0 || c === total_cols - 1) {
@@ -106,42 +115,101 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
         continue;
       }
 
+      // Check if this is the first or last row (excluding expansion gap border)
+      const is_first_row = r === 1;
+      const is_last_row = r === total_rows - 2;
+      let too_narrow = false;
+      if ((is_first_row || is_last_row) && plank_width_mm < min_first_last_row_width_mm) {
+        too_narrow = true;
+      }
+
       // Last column (cut plank)
       if (c === total_cols - 2 && last_col_length > 0) {
+        const too_short = last_col_length < min_plank_length_mm;
+        // Butt joint at the end of this cut plank (distance from left wall)
+        const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + last_col_length;
+        butt_joints.push(butt_joint_pos);
+
         row.push({
           type: "cut",
           row: r,
           col: c,
           length_mm: last_col_length,
           width_mm: plank_width_mm,
-          is_end_cut: true
+          is_end_cut: true,
+          too_short,
+          too_narrow
         });
         continue;
       }
 
       // Last row (cut plank)
       if (r === total_rows - 2 && last_row_width > 0) {
+        const too_short = last_row_width < min_plank_length_mm;
+        // Butt joint at the end of this cut plank (distance from left wall)
+        const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + plank_length_mm;
+        butt_joints.push(butt_joint_pos);
+
+        // For last row, check if the width of the cut is too narrow
+        const last_row_too_narrow = last_row_width < min_first_last_row_width_mm;
         row.push({
           type: "cut",
           row: r,
           col: c,
           length_mm: plank_length_mm,
           width_mm: last_row_width,
-          is_end_cut: true
+          is_end_cut: true,
+          too_short,
+          too_narrow: last_row_too_narrow
         });
         continue;
       }
 
       // Full plank
+      // Butt joint at the end of this full plank (distance from left wall)
+      const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + plank_length_mm;
+      // Only add butt joint if not the last column (otherwise it's a cut plank)
+      if (c < total_cols - 2) {
+        butt_joints.push(butt_joint_pos);
+      }
+
       row.push({
         type: "full",
         row: r,
         col: c,
         length_mm: plank_length_mm,
-        width_mm: plank_width_mm
+        width_mm: plank_width_mm,
+        too_narrow
       });
     }
     cells.push(row);
+    butt_joints_by_row.push(butt_joints);
+  }
+
+  // Enforce minimum butt joint offset between adjacent rows
+  for (let r = 2; r < total_rows - 1; r++) { // skip expansion gap and first row
+    const prev_joints = butt_joints_by_row[r - 1];
+    const curr_joints = butt_joints_by_row[r];
+    for (let c = 0; c < curr_joints.length; c++) {
+      const curr_pos = curr_joints[c];
+      for (let p = 0; p < prev_joints.length; p++) {
+        const prev_pos = prev_joints[p];
+        if (Math.abs(curr_pos - prev_pos) < input.min_butt_joint_offset_mm) {
+          // Find the cell in this row/col that ends at curr_pos
+          for (let cell of cells[r]) {
+            // Only flag cut or full planks (not expansion gap)
+            if ((cell.type === "cut" || cell.type === "full") && !cell.too_close_butt_joint) {
+              // Calculate the end position of this cell
+              const cell_start = expansion_gap_mm + (cell.col - 1) * plank_length_mm;
+              const cell_end = cell_start + cell.length_mm;
+              if (Math.abs(cell_end - curr_pos) < 1e-6) {
+                cell.too_close_butt_joint = true;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   return {
