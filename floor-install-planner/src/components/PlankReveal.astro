@@ -70,13 +70,17 @@ const { grid } = Astro.props;
       ))
     )}
   </div>
-  <button id="add-plank-btn" class="add-plank-btn">Add Next Plank</button>
+  <div style="display: flex; justify-content: center; gap: 1em;">
+    <button id="undo-plank-btn" class="add-plank-btn" style="background: #888;">Undo Last Plank</button>
+    <button id="add-plank-btn" class="add-plank-btn">Add Next Plank</button>
+  </div>
 </div>
 
 <script type="module" is:inline>
   const root = document.getElementById('plank-reveal-root');
   const cells = Array.from(root.querySelectorAll('.plank-cell'));
   const btn = root.querySelector('#add-plank-btn');
+  const undoBtn = root.querySelector('#undo-plank-btn');
   // Only planks (full/cut) have laid_order > 0
   const plankCells = cells.filter(cell => {
     const type = cell.getAttribute('data-type');
@@ -94,6 +98,19 @@ const { grid } = Astro.props;
         btn.disabled = true;
         btn.textContent = "All Planks Laid";
       }
+      undoBtn.disabled = false;
+    }
+  }
+  function undoReveal() {
+    if (revealed > 0) {
+      revealed--;
+      plankCells[revealed].setAttribute('data-hidden', 'true');
+      plankCells[revealed].style.color = 'transparent';
+      btn.disabled = false;
+      btn.textContent = "Add Next Plank";
+      if (revealed === 0) {
+        undoBtn.disabled = true;
+      }
     }
   }
   // Hide all planks initially
@@ -102,6 +119,9 @@ const { grid } = Astro.props;
     cell.style.color = 'transparent';
   });
   btn.addEventListener('click', revealNext);
+  undoBtn.addEventListener('click', undoReveal);
+  // Set initial button states
+  undoBtn.disabled = true;
   // Optionally, reveal the first plank on load
   // revealNext();
 </script>
