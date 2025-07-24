@@ -38,7 +38,7 @@ try {
       </ul>
       <h2>Flooring Layout Visualization</h2>
       {grid ? (
-        <PlankReveal grid={grid} />
+        <PlankReveal grid={grid} expansionGapMm={input.expansion_gap_mm} />
       ) : (
         <div>No grid data found.</div>
       )}

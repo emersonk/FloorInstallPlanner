@@ -89,95 +89,32 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
   const last_col_length = usable_length - cols * plank_length_mm;
   const last_row_width = usable_width - rows * plank_width_mm;
 
-  // Total grid size (add 2 for expansion gap border)
-  const total_rows = rows + 2;
-  const total_cols = cols + 2;
-
-  // Build grid
+  // Build grid (no expansion gap border)
   const cells: PlankCell[][] = [];
-  // Track butt joint positions for each row (excluding expansion gap border)
+  // Track butt joint positions for each row
   const butt_joints_by_row: number[][] = [];
 
   // Track the order in which planks are laid
   let laidOrderCounter = 1;
 
-  for (let r = 0; r < total_rows; r++) {
+  for (let r = 0; r < rows; r++) {
     const row: PlankCell[] = [];
     // Track butt joint positions (in mm from left wall) for this row
     const butt_joints: number[] = [];
 
-    for (let c = 0; c < total_cols; c++) {
-      // Expansion gap border
-      if (r === 0 || r === total_rows - 1 || c === 0 || c === total_cols - 1) {
-        row.push({
-          type: "expansion_gap",
-          row: r,
-          col: c,
-          length_mm: (c === 0 || c === total_cols - 1) ? expansion_gap_mm : plank_length_mm,
-          width_mm: (r === 0 || r === total_rows - 1) ? expansion_gap_mm : plank_width_mm
-        });
-        continue;
-      }
+    // Check if this is the first or last row
+    const is_first_row = r === 0;
+    const is_last_row = r === rows - 1;
+    let too_narrow = false;
+    if ((is_first_row || is_last_row) && plank_width_mm < min_first_last_row_width_mm) {
+      too_narrow = true;
+    }
 
-      // Check if this is the first or last row (excluding expansion gap border)
-      const is_first_row = r === 1;
-      const is_last_row = r === total_rows - 2;
-      let too_narrow = false;
-      if ((is_first_row || is_last_row) && plank_width_mm < min_first_last_row_width_mm) {
-        too_narrow = true;
-      }
-
-      // Last column (cut plank)
-      if (c === total_cols - 2 && last_col_length > 0) {
-        const too_short = last_col_length < min_plank_length_mm;
-        // Butt joint at the end of this cut plank (distance from left wall)
-        const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + last_col_length;
-        butt_joints.push(butt_joint_pos);
-
-        row.push({
-          type: "cut",
-          row: r,
-          col: c,
-          length_mm: last_col_length,
-          width_mm: plank_width_mm,
-          is_end_cut: true,
-          too_short,
-          too_narrow,
-          laid_order: laidOrderCounter++
-        });
-        continue;
-      }
-
-      // Last row (cut plank)
-      if (r === total_rows - 2 && last_row_width > 0) {
-        const too_short = last_row_width < min_plank_length_mm;
-        // Butt joint at the end of this cut plank (distance from left wall)
-        const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + plank_length_mm;
-        butt_joints.push(butt_joint_pos);
-
-        // For last row, check if the width of the cut is too narrow
-        const last_row_too_narrow = last_row_width < min_first_last_row_width_mm;
-        row.push({
-          type: "cut",
-          row: r,
-          col: c,
-          length_mm: plank_length_mm,
-          width_mm: last_row_width,
-          is_end_cut: true,
-          too_short,
-          too_narrow: last_row_too_narrow,
-          laid_order: laidOrderCounter++
-        });
-        continue;
-      }
-
+    for (let c = 0; c < cols; c++) {
       // Full plank
       // Butt joint at the end of this full plank (distance from left wall)
-      const butt_joint_pos = expansion_gap_mm + (c - 1) * plank_length_mm + plank_length_mm;
-      // Only add butt joint if not the last column (otherwise it's a cut plank)
-      if (c < total_cols - 2) {
-        butt_joints.push(butt_joint_pos);
-      }
+      const butt_joint_pos = c * plank_length_mm + plank_length_mm;
+      butt_joints.push(butt_joint_pos);
 
       row.push({
         type: "full",
@@ -189,12 +126,77 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
         laid_order: laidOrderCounter++
       });
     }
+
+    // Last column (cut plank)
+    if (last_col_length > 0) {
+      const too_short = last_col_length < min_plank_length_mm;
+      const butt_joint_pos = cols * plank_length_mm + last_col_length;
+      butt_joints.push(butt_joint_pos);
+
+      row.push({
+        type: "cut",
+        row: r,
+        col: cols,
+        length_mm: last_col_length,
+        width_mm: plank_width_mm,
+        is_end_cut: true,
+        too_short,
+        too_narrow,
+        laid_order: laidOrderCounter++
+      });
+    }
+
+    cells.push(row);
+    butt_joints_by_row.push(butt_joints);
+  }
+
+  // Last row (cut planks)
+  if (last_row_width > 0) {
+    const row: PlankCell[] = [];
+    const butt_joints: number[] = [];
+    for (let c = 0; c < cols; c++) {
+      const too_short = plank_length_mm < min_plank_length_mm;
+      const last_row_too_narrow = last_row_width < min_first_last_row_width_mm;
+      const butt_joint_pos = c * plank_length_mm + plank_length_mm;
+      butt_joints.push(butt_joint_pos);
+
+      row.push({
+        type: "cut",
+        row: rows,
+        col: c,
+        length_mm: plank_length_mm,
+        width_mm: last_row_width,
+        is_end_cut: true,
+        too_short,
+        too_narrow: last_row_too_narrow,
+        laid_order: laidOrderCounter++
+      });
+    }
+    // Last cell (corner cut)
+    if (last_col_length > 0) {
+      const too_short = last_col_length < min_plank_length_mm;
+      const last_row_too_narrow = last_row_width < min_first_last_row_width_mm;
+      const butt_joint_pos = cols * plank_length_mm + last_col_length;
+      butt_joints.push(butt_joint_pos);
+
+      row.push({
+        type: "cut",
+        row: rows,
+        col: cols,
+        length_mm: last_col_length,
+        width_mm: last_row_width,
+        is_end_cut: true,
+        too_short,
+        too_narrow: last_row_too_narrow,
+        laid_order: laidOrderCounter++
+      });
+    }
     cells.push(row);
     butt_joints_by_row.push(butt_joints);
   }
 
   // Enforce minimum butt joint offset between adjacent rows
-  for (let r = 2; r < total_rows - 1; r++) { // skip expansion gap and first row
+  for (let r = 1; r < butt_joints_by_row.length; r++) { // skip first row
     const prev_joints = butt_joints_by_row[r - 1];
     const curr_joints = butt_joints_by_row[r];
     for (let c = 0; c < curr_joints.length; c++) {
@@ -204,10 +206,10 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
         if (Math.abs(curr_pos - prev_pos) < input.min_butt_joint_offset_mm) {
           // Find the cell in this row/col that ends at curr_pos
           for (let cell of cells[r]) {
-            // Only flag cut or full planks (not expansion gap)
+            // Only flag cut or full planks
             if ((cell.type === "cut" || cell.type === "full") && !cell.too_close_butt_joint) {
               // Calculate the end position of this cell
-              const cell_start = expansion_gap_mm + (cell.col - 1) * plank_length_mm;
+              const cell_start = cell.col * input.plank_length_mm;
               const cell_end = cell_start + cell.length_mm;
               if (Math.abs(cell_end - curr_pos) < 1e-6) {
                 cell.too_close_butt_joint = true;
@@ -220,8 +222,8 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
   }
 
   return {
-    rows: total_rows,
-    cols: total_cols,
+    rows: cells.length,
+    cols: cells[0]?.length || 0,
     cells
   };
 }
