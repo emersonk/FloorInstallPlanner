@@ -7,7 +7,7 @@ Building a very simple AstroJS web application that takes flooring plank dimensi
 
 It is a static site as the JSON input file is located in the directory.
 
-It has a Typescript engine which dynamically generates the html and css grid required to render the visualization based on the given flooring dimensions, room dimensions, and the constraints being followed.
+It has a Typescript engine which dynamically generates the html and css grid required to render the flooring layout visualization based on the given flooring dimensions, room dimensions, and the constraints being followed.
 
 All input dimensions are taken as mm.
 
