@@ -9,23 +9,29 @@ Tracks what works, what's left to build, current status, known issues, and the e
 - Project repository and AstroJS scaffold are set up.
 - Memory bank documentation structure is in place.
 - TypeScript engine outputs a grid of planks and expansion gaps.
-- Color-coded, labeled CSS grid visualization is live and matches input parameters.
-- All core installation constraints (min plank length, min first/last row width, min butt joint offset) are implemented and visualized.
+- Interactive, stepwise plank laying: the grid starts empty, and planks are revealed one by one in lay order via a button.
+- Each plank displays its dimensions and the order it was laid, inside the cell.
+- All core installation constraints (min plank length, min first/last row width, min butt joint offset) are implemented in the layout engine.
+- Visualization is minimal: no color coding or legend, just clear plank info and interactive reveal.
+- Astro Islands and vanilla JS are used for targeted client-side interactivity.
 
 ### What's Left to Build
+- Consider further UI/UX polish (e.g., animation, progress indicator, reset button).
+- Gather user feedback for additional features or improvements.
+- Continue to update memory bank and documentation as features are added or changed.
 - Review and refactor code for clarity and maintainability.
-- Add or improve tooltips, labels, and summary statistics if desired.
-- Document completed constraint logic and visualization in systemPatterns.md.
-- Continue to update memory bank and documentation as features are added.
 
 ### Current Status
-- All core installation constraints are implemented and visualized in the grid.
-- Visualization highlights violations of min plank length, min first/last row width, and min butt joint offset.
-- Project is ready for code review, refactoring, and further enhancements or testing.
+- The project now features an interactive, minimal, stepwise visualization of plank installation.
+- All planks start hidden; the user reveals them one by one in lay order.
+- No color coding or legend is present; each plank displays its dimensions and lay order.
+- All core installation constraints are implemented in the layout engine.
+- No known issues at this stage.
 
 ### Known Issues
 - None at this stage.
 
 ### Evolution of Project Decisions
-- Initial decision to use AstroJS, TypeScript, and CSS grid for a static visualization tool.
-- Documentation-first workflow established using the memory bank.
+- Initial decision to use AstroJS, TypeScript, and CSS grid for a static, color-coded visualization tool.
+- Moved to a documentation-first workflow using the memory bank.
+- Evolved from static, color-coded visualization to interactive, stepwise plank laying using Astro Islands and vanilla JS, with a focus on clarity and minimalism.

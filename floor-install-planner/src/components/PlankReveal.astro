@@ -1,0 +1,101 @@
+---
+const { grid } = Astro.props;
+---
+
+<style>
+.plank-grid {
+  display: grid;
+  gap: 1px;
+  background: #333;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  border: 1px solid #333;
+}
+.plank-cell {
+  min-width: 10px;
+  min-height: 10px;
+  background: #fff;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  box-sizing: border-box;
+  transition: background 0.2s;
+}
+.plank-cell[data-hidden="true"] {
+  background: #fff;
+  color: transparent;
+  border: 1px solid #eee;
+}
+.add-plank-btn {
+  margin: 1em auto;
+  display: block;
+  padding: 0.5em 1.5em;
+  font-size: 1em;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-plank-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+</style>
+
+<div id="plank-reveal-root">
+  <div
+    class="plank-grid"
+    style={`grid-template-columns: ${grid.cells[0].map((cell: any) => (cell.length_mm / grid.cells[0].reduce((a: any, b: any) => a + b.length_mm, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')}; grid-template-rows: ${grid.cells.map((row: any) => (row[0].width_mm / grid.cells.map((r: any) => r[0].width_mm).reduce((a: any, b: any) => a + b, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')};`}
+  >
+    {grid.cells.map((row: any, rIdx: number) =>
+      row.map((cell: any, cIdx: number) => {
+        let content = "";
+        if (cell.type === "full" || cell.type === "cut") {
+          content = `<div style='display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;'>
+            <span style='font-size:0.8em;font-weight:bold;'>${cell.length_mm}x${cell.width_mm}</span>
+            <span style='font-size:0.7em;color:#333;'>#${cell.laid_order}</span>
+          </div>`;
+        }
+        return `<div class="plank-cell" data-type="${cell.type}" data-laid-order="${cell.laid_order || 0}" data-hidden="true" style="grid-row:${rIdx + 1};grid-column:${cIdx + 1};">${content}</div>`;
+      }).join("")
+    ).join("")}
+  </div>
+  <button id="add-plank-btn" class="add-plank-btn">Add Next Plank</button>
+</div>
+
+<script type="module" is:inline>
+  const root = document.getElementById('plank-reveal-root');
+  const cells = Array.from(root.querySelectorAll('.plank-cell'));
+  const btn = root.querySelector('#add-plank-btn');
+  // Only planks (full/cut) have laid_order > 0
+  const plankCells = cells.filter(cell => {
+    const type = cell.getAttribute('data-type');
+    return type === 'full' || type === 'cut';
+  }).sort((a, b) => {
+    return Number(a.getAttribute('data-laid-order')) - Number(b.getAttribute('data-laid-order'));
+  });
+  let revealed = 0;
+  function revealNext() {
+    if (revealed < plankCells.length) {
+      plankCells[revealed].setAttribute('data-hidden', 'false');
+      plankCells[revealed].style.color = '';
+      revealed++;
+      if (revealed === plankCells.length) {
+        btn.disabled = true;
+        btn.textContent = "All Planks Laid";
+      }
+    }
+  }
+  // Hide all planks initially
+  plankCells.forEach(cell => {
+    cell.setAttribute('data-hidden', 'true');
+    cell.style.color = 'transparent';
+  });
+  btn.addEventListener('click', revealNext);
+  // Optionally, reveal the first plank on load
+  // revealNext();
+</script>

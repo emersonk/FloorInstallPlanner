@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { parseFloorPlanInput, calculateFloorPlanGrid } from '../FloorPlanner.ts';
 import type { FloorPlanInput, FloorPlanGrid } from '../FloorPlanner.ts';
+import PlankReveal from '../components/PlankReveal.astro';
 
 // Import the JSON input at build time
 import floorplanData from '../../public/floorplan.json';
@@ -37,121 +38,7 @@ try {
       </ul>
       <h2>Flooring Layout Visualization</h2>
       {grid ? (
-        <>
-          {/* Legend removed as per new requirements */}
-          {(() => {
-            // Calculate the real-world width and length of the room (mm)
-            const roomWidth = input.room_width_mm;
-            const roomLength = input.room_length_mm;
-            // Set max grid width in px
-            const maxGridWidthPx = 1000;
-            // Calculate aspect ratio (width/length)
-            const aspectRatio = roomWidth / roomLength;
-            // Set grid width to 100% (up to maxGridWidthPx)
-            // Set grid height based on aspect ratio
-            const gridWidthPx = maxGridWidthPx;
-            const gridHeightPx = Math.round(gridWidthPx / aspectRatio);
-
-            // Build grid-template-columns and grid-template-rows based on cell sizes
-            // Each cell's width/height is proportional to its real size
-            const colSizes = grid.cells[0].map((cell) => cell.length_mm);
-            const rowSizes = grid.cells.map((row) => row[0].width_mm);
-
-            const totalColSize = colSizes.reduce((a, b) => a + b, 0);
-            const totalRowSize = rowSizes.reduce((a, b) => a + b, 0);
-
-            const colFracs = colSizes.map((size) => (size / totalColSize).toFixed(4)).join('fr ');
-            const rowFracs = rowSizes.map((size) => (size / totalRowSize).toFixed(4)).join('fr ');
-
-            return (
-              <div
-                style={`
-                  display: grid;
-                  grid-template-columns: ${colFracs}fr;
-                  grid-template-rows: ${rowFracs}fr;
-                  gap: 1px;
-                  background: #333;
-                  width: 100%;
-                  max-width: ${maxGridWidthPx}px;
-                  height: ${gridHeightPx}px;
-                  margin: 0 auto;
-                `}
-              >
-                {grid.cells.map((row, rIdx) =>
-                  row.map((cell, cIdx) => {
-                    let bg = "#fff";
-                    let tooltip = "";
-                    let content = null;
-                    if (cell.too_close_butt_joint) {
-                      bg = "#ffb74d"; // orange for joint too close
-                      tooltip = "Butt joint offset violated";
-                    } else if (cell.too_narrow) {
-                      bg = "#ce93d8"; // purple for too narrow
-                      tooltip = "First/Last row too narrow";
-                    } else if (cell.type === "full") {
-                      bg = "#b3e5fc";
-                      tooltip = "Full plank";
-                    } else if (cell.type === "cut") {
-                      if (cell.too_short) {
-                        bg = "#ff8a80"; // red for too short
-                        tooltip = `Cut plank too short (${cell.length_mm}mm x ${cell.width_mm}mm)`;
-                      } else {
-                        bg = "#ffe082";
-                        tooltip = `Cut plank (${cell.length_mm}mm x ${cell.width_mm}mm)`;
-                      }
-                    } else if (cell.type === "expansion_gap") {
-                      bg = "#eee";
-                      tooltip = "Expansion gap";
-                    }
-
-                    // Show dimensions and order for full/cut planks
-                    if (cell.type === "full" || cell.type === "cut") {
-                      content = (
-                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                          <span style="font-size: 0.8em; font-weight: bold;">
-                            {cell.length_mm}x{cell.width_mm}
-                          </span>
-                          <span style="font-size: 0.7em; color: #333;">
-                            #{cell.laid_order}
-                          </span>
-                        </div>
-                      );
-                    } else if (cell.too_close_butt_joint) {
-                      content = (
-                        <span style="font-size: 0.7em; color: #333; text-align: center;">Joint Too Close</span>
-                      );
-                    } else if (cell.too_narrow) {
-                      content = (
-                        <span style="font-size: 0.7em; color: #333; text-align: center;">Too Narrow</span>
-                      );
-                    } else {
-                      content = null;
-                    }
-
-                    return (
-                      <div
-                        style={`
-                          min-width: 10px;
-                          min-height: 10px;
-                          background: ${bg};
-                          border: 1px solid #333;
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                          font-size: 0.7em;
-                          box-sizing: border-box;
-                        `}
-                        title={tooltip}
-                      >
-                        {content}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            );
-          })()}
-        </>
+        <PlankReveal grid={grid} />
       ) : (
         <div>No grid data found.</div>
       )}
