@@ -1,0 +1,12 @@
+{
+  "room_length_mm": 5000,
+  "room_width_mm": 3500,
+  "plank_length_mm": 1200,
+  "plank_width_mm": 200,
+  "expansion_gap_mm": 10,
+  "max_width_without_gap_mm": 6000,
+  "max_length_without_gap_mm": 8000,
+  "min_butt_joint_offset_mm": 300,
+  "min_plank_length_mm": 400,
+  "min_first_last_row_width_mm": 80
+}

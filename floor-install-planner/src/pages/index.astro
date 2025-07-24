@@ -1,11 +1,47 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { parseFloorPlanInput, calculateFloorPlanGrid } from '../FloorPlanner.ts';
+import type { FloorPlanInput, FloorPlanGrid } from '../FloorPlanner.ts';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Import the JSON input at build time
+import floorplanData from '../../public/floorplan.json';
+
+let input: FloorPlanInput | null = null;
+let grid: FloorPlanGrid | null = null;
+let error: string | null = null;
+
+try {
+  input = parseFloorPlanInput(floorplanData);
+  grid = calculateFloorPlanGrid(input);
+} catch (e) {
+  error = (e as Error).message;
+}
 ---
 
 <Layout>
-	<Welcome />
+  <h1>Floor Install Planner</h1>
+  {error ? (
+    <div style="color: red;">Error: {error}</div>
+  ) : input ? (
+    <>
+      <h2>Input Parameters</h2>
+      <ul>
+        <li>Room: {input.room_length_mm}mm x {input.room_width_mm}mm</li>
+        <li>Plank: {input.plank_length_mm}mm x {input.plank_width_mm}mm</li>
+        <li>Expansion gap: {input.expansion_gap_mm}mm</li>
+        <li>Max width without gap: {input.max_width_without_gap_mm}mm</li>
+        <li>Max length without gap: {input.max_length_without_gap_mm}mm</li>
+        <li>Min butt joint offset: {input.min_butt_joint_offset_mm}mm</li>
+        <li>Min plank length: {input.min_plank_length_mm}mm</li>
+        <li>Min first/last row width: {input.min_first_last_row_width_mm}mm</li>
+      </ul>
+      <h2>Flooring Layout Visualization</h2>
+      <div>
+        {/* TODO: Render grid visualization here */}
+        <em>Visualization coming soon.</em>
+      </div>
+    </>
+  ) : (
+    <div>No input data found.</div>
+  )}
 </Layout>
