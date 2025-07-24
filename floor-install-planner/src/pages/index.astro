@@ -20,30 +20,56 @@ try {
 ---
 
 <Layout>
-  <h1>Floor Install Planner</h1>
-  {error ? (
-    <div style="color: red;">Error: {error}</div>
-  ) : input ? (
-    <>
-      <h2>Input Parameters</h2>
-      <ul>
-        <li>Room: {input.room_length_mm}mm x {input.room_width_mm}mm</li>
-        <li>Plank: {input.plank_length_mm}mm x {input.plank_width_mm}mm</li>
-        <li>Expansion gap: {input.expansion_gap_mm}mm</li>
-        <li>Max width without gap: {input.max_width_without_gap_mm}mm</li>
-        <li>Max length without gap: {input.max_length_without_gap_mm}mm</li>
-        <li>Min butt joint offset: {input.min_butt_joint_offset_mm}mm</li>
-        <li>Min plank length: {input.min_plank_length_mm}mm</li>
-        <li>Min first/last row width: {input.min_first_last_row_width_mm}mm</li>
-      </ul>
-      <h2>Flooring Layout Visualization</h2>
-      {grid ? (
-        <PlankReveal grid={grid} expansionGapMm={input.expansion_gap_mm} />
+  <div class="centered-content">
+    <div class="main-content-inner">
+      <h1>Floor Install Planner</h1>
+      {error ? (
+        <div style="color: red;">Error: {error}</div>
+      ) : input ? (
+        <>
+          <h2>Input Parameters</h2>
+          <ul>
+            <li>Room: {input.room_length_mm}mm x {input.room_width_mm}mm</li>
+            <li>Plank: {input.plank_length_mm}mm x {input.plank_width_mm}mm</li>
+            <li>Expansion gap: {input.expansion_gap_mm}mm</li>
+            <li>Max width without gap: {input.max_width_without_gap_mm}mm</li>
+            <li>Max length without gap: {input.max_length_without_gap_mm}mm</li>
+            <li>Min butt joint offset: {input.min_butt_joint_offset_mm}mm</li>
+            <li>Min plank length: {input.min_plank_length_mm}mm</li>
+            <li>Min first/last row width: {input.min_first_last_row_width_mm}mm</li>
+          </ul>
+          <h2>Flooring Layout Visualization</h2>
+          {grid ? (
+            <PlankReveal grid={grid} expansionGapMm={input.expansion_gap_mm} />
+          ) : (
+            <div>No grid data found.</div>
+          )}
+        </>
       ) : (
-        <div>No grid data found.</div>
+        <div>No input data found.</div>
       )}
-    </>
-  ) : (
-    <div>No input data found.</div>
-  )}
+    </div>
+  </div>
+  <style>
+    .centered-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      width: 100vw;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    .main-content-inner {
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    body {
+      background: #fff;
+    }
+  </style>
 </Layout>
