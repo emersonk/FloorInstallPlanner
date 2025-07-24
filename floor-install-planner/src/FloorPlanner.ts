@@ -28,6 +28,7 @@ export interface PlankCell {
   too_short?: boolean; // Indicates if the cut is below the minimum plank length
   too_narrow?: boolean; // Indicates if the row is below the minimum first/last row width
   too_close_butt_joint?: boolean; // Indicates if butt joint offset is violated
+  laid_order?: number; // Order in which the plank was laid (for display)
 }
 
 export interface FloorPlanGrid {
@@ -97,6 +98,9 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
   // Track butt joint positions for each row (excluding expansion gap border)
   const butt_joints_by_row: number[][] = [];
 
+  // Track the order in which planks are laid
+  let laidOrderCounter = 1;
+
   for (let r = 0; r < total_rows; r++) {
     const row: PlankCell[] = [];
     // Track butt joint positions (in mm from left wall) for this row
@@ -138,7 +142,8 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
           width_mm: plank_width_mm,
           is_end_cut: true,
           too_short,
-          too_narrow
+          too_narrow,
+          laid_order: laidOrderCounter++
         });
         continue;
       }
@@ -160,7 +165,8 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
           width_mm: last_row_width,
           is_end_cut: true,
           too_short,
-          too_narrow: last_row_too_narrow
+          too_narrow: last_row_too_narrow,
+          laid_order: laidOrderCounter++
         });
         continue;
       }
@@ -179,7 +185,8 @@ export function calculateFloorPlanGrid(input: FloorPlanInput): FloorPlanGrid {
         col: c,
         length_mm: plank_length_mm,
         width_mm: plank_width_mm,
-        too_narrow
+        too_narrow,
+        laid_order: laidOrderCounter++
       });
     }
     cells.push(row);
