@@ -47,69 +47,99 @@ try {
             <span style="display:inline-block;width:1em;height:1em;background:#ffb74d;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Joint Too Close
             <span style="display:inline-block;width:1em;height:1em;background:#eee;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Expansion Gap
           </div>
-          <div
-            style={`
-              display: grid;
-              grid-template-rows: repeat(${grid.rows}, 24px);
-              grid-template-columns: repeat(${grid.cols}, 48px);
-              gap: 1px;
-              background: #333;
-              width: max-content;
-            `}
-          >
-            {grid.cells.map((row, rIdx) =>
-              row.map((cell, cIdx) => {
-                let bg = "#fff";
-                let label = "";
-                let tooltip = "";
-                if (cell.too_close_butt_joint) {
-                  bg = "#ffb74d"; // orange for joint too close
-                  label = "Joint Too Close";
-                  tooltip = "Butt joint offset violated";
-                } else if (cell.too_narrow) {
-                  bg = "#ce93d8"; // purple for too narrow
-                  label = "Too Narrow";
-                  tooltip = "First/Last row too narrow";
-                } else if (cell.type === "full") {
-                  bg = "#b3e5fc";
-                  label = "";
-                  tooltip = "Full plank";
-                } else if (cell.type === "cut") {
-                  if (cell.too_short) {
-                    bg = "#ff8a80"; // red for too short
-                    label = "Too Short";
-                    tooltip = `Cut plank too short (${cell.length_mm}mm x ${cell.width_mm}mm)`;
-                  } else {
-                    bg = "#ffe082";
-                    label = "Cut";
-                    tooltip = `Cut plank (${cell.length_mm}mm x ${cell.width_mm}mm)`;
-                  }
-                } else if (cell.type === "expansion_gap") {
-                  bg = "#eee";
-                  label = "";
-                  tooltip = "Expansion gap";
-                }
-                return (
-                  <div
-                    style={`
-                      width: 48px;
-                      height: 24px;
-                      background: ${bg};
-                      border: 1px solid #333;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      font-size: 0.7em;
-                      box-sizing: border-box;
-                    `}
-                    title={tooltip}
-                  >
-                    {label}
-                  </div>
-                );
-              })
-            )}
-          </div>
+          {(() => {
+            // Calculate the real-world width and length of the room (mm)
+            const roomWidth = input.room_width_mm;
+            const roomLength = input.room_length_mm;
+            // Set max grid width in px
+            const maxGridWidthPx = 1000;
+            // Calculate aspect ratio (width/length)
+            const aspectRatio = roomWidth / roomLength;
+            // Set grid width to 100% (up to maxGridWidthPx)
+            // Set grid height based on aspect ratio
+            const gridWidthPx = maxGridWidthPx;
+            const gridHeightPx = Math.round(gridWidthPx / aspectRatio);
+
+            // Build grid-template-columns and grid-template-rows based on cell sizes
+            // Each cell's width/height is proportional to its real size
+            const colSizes = grid.cells[0].map((cell) => cell.length_mm);
+            const rowSizes = grid.cells.map((row) => row[0].width_mm);
+
+            const totalColSize = colSizes.reduce((a, b) => a + b, 0);
+            const totalRowSize = rowSizes.reduce((a, b) => a + b, 0);
+
+            const colFracs = colSizes.map((size) => (size / totalColSize).toFixed(4)).join('fr ');
+            const rowFracs = rowSizes.map((size) => (size / totalRowSize).toFixed(4)).join('fr ');
+
+            return (
+              <div
+                style={`
+                  display: grid;
+                  grid-template-columns: ${colFracs}fr;
+                  grid-template-rows: ${rowFracs}fr;
+                  gap: 1px;
+                  background: #333;
+                  width: 100%;
+                  max-width: ${maxGridWidthPx}px;
+                  height: ${gridHeightPx}px;
+                  margin: 0 auto;
+                `}
+              >
+                {grid.cells.map((row, rIdx) =>
+                  row.map((cell, cIdx) => {
+                    let bg = "#fff";
+                    let label = "";
+                    let tooltip = "";
+                    if (cell.too_close_butt_joint) {
+                      bg = "#ffb74d"; // orange for joint too close
+                      label = "Joint Too Close";
+                      tooltip = "Butt joint offset violated";
+                    } else if (cell.too_narrow) {
+                      bg = "#ce93d8"; // purple for too narrow
+                      label = "Too Narrow";
+                      tooltip = "First/Last row too narrow";
+                    } else if (cell.type === "full") {
+                      bg = "#b3e5fc";
+                      label = "";
+                      tooltip = "Full plank";
+                    } else if (cell.type === "cut") {
+                      if (cell.too_short) {
+                        bg = "#ff8a80"; // red for too short
+                        label = "Too Short";
+                        tooltip = `Cut plank too short (${cell.length_mm}mm x ${cell.width_mm}mm)`;
+                      } else {
+                        bg = "#ffe082";
+                        label = "Cut";
+                        tooltip = `Cut plank (${cell.length_mm}mm x ${cell.width_mm}mm)`;
+                      }
+                    } else if (cell.type === "expansion_gap") {
+                      bg = "#eee";
+                      label = "";
+                      tooltip = "Expansion gap";
+                    }
+                    return (
+                      <div
+                        style={`
+                          min-width: 10px;
+                          min-height: 10px;
+                          background: ${bg};
+                          border: 1px solid #333;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 0.7em;
+                          box-sizing: border-box;
+                        `}
+                        title={tooltip}
+                      >
+                        {label}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            );
+          })()}
         </>
       ) : (
         <div>No grid data found.</div>
