@@ -6,9 +6,10 @@ Tracks current work focus, recent changes, next steps, active decisions, importa
 ---
 
 ### Current Work Focus
-Implementing and refining an interactive, stepwise floor installation visualization. The grid now starts empty, and planks are revealed one at a time in lay order via a button, with each plank displaying its dimensions and order. The visualization is minimal, with no color coding or legend.
+Debugging a persistent grey area in the grid visualization. Discovered that the issue is not with page layout or CSS, but with the grid data: some rows in the grid have fewer cells than others, causing the CSS grid to render empty columns with a grey background. Focus is now on normalizing the grid data or fixing the layout engine to ensure all rows have the same number of cells.
 
 ### Recent Changes
+- Identified that the grey area in the visualization is due to inconsistent row lengths in the grid data, not a layout or CSS issue.
 - Removed all color coding and the legend from the visualization.
 - Each plank now displays its dimensions and the order it was laid, inside the cell.
 - Added a new interactive "Add Next Plank" button that reveals planks one by one in lay order.
@@ -16,6 +17,7 @@ Implementing and refining an interactive, stepwise floor installation visualizat
 - Updated the grid rendering to be fully SSR-compatible and minimal.
 
 ### Next Steps
+- Normalize the grid data so all rows have the same number of cells, or update the layout engine to ensure consistent row lengths.
 - Consider further UI/UX polish (e.g., animation, progress indicator, reset button).
 - Gather user feedback for additional features or improvements.
 - Continue to update memory bank and documentation as features are added or changed.
