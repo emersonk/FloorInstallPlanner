@@ -52,17 +52,23 @@ const { grid } = Astro.props;
     style={`grid-template-columns: ${grid.cells[0].map((cell: any) => (cell.length_mm / grid.cells[0].reduce((a: any, b: any) => a + b.length_mm, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')}; grid-template-rows: ${grid.cells.map((row: any) => (row[0].width_mm / grid.cells.map((r: any) => r[0].width_mm).reduce((a: any, b: any) => a + b, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')};`}
   >
     {grid.cells.map((row: any, rIdx: number) =>
-      row.map((cell: any, cIdx: number) => {
-        let content = "";
-        if (cell.type === "full" || cell.type === "cut") {
-          content = `<div style='display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;'>
-            <span style='font-size:0.8em;font-weight:bold;'>${cell.length_mm}x${cell.width_mm}</span>
-            <span style='font-size:0.7em;color:#333;'>#${cell.laid_order}</span>
-          </div>`;
-        }
-        return `<div class="plank-cell" data-type="${cell.type}" data-laid-order="${cell.laid_order || 0}" data-hidden="true" style="grid-row:${rIdx + 1};grid-column:${cIdx + 1};">${content}</div>`;
-      }).join("")
-    ).join("")}
+      row.map((cell: any, cIdx: number) => (
+        <div
+          class="plank-cell"
+          data-type={cell.type}
+          data-laid-order={cell.laid_order || 0}
+          data-hidden="true"
+          style={`grid-row:${rIdx + 1};grid-column:${cIdx + 1};`}
+        >
+          {(cell.type === "full" || cell.type === "cut") && (
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;">
+              <span style="font-size:0.8em;font-weight:bold;">{cell.length_mm}x{cell.width_mm}</span>
+              <span style="font-size:0.7em;color:#333;">#{cell.laid_order}</span>
+            </div>
+          )}
+        </div>
+      ))
+    )}
   </div>
   <button id="add-plank-btn" class="add-plank-btn">Add Next Plank</button>
 </div>
