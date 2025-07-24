@@ -1,5 +1,11 @@
 ---
 const { grid } = Astro.props;
+
+// Calculate scaling so the room width fits 800px
+const TARGET_PX = 800;
+const room_width_mm = grid.cells[0].reduce((sum, cell) => sum + cell.length_mm, 0);
+const room_height_mm = grid.cells.length > 0 ? grid.cells.map(row => row[0].width_mm).reduce((sum, w) => sum + w, 0) : 0;
+const scale = room_width_mm > 0 ? TARGET_PX / room_width_mm : 1;
 ---
 
 <style>
@@ -49,7 +55,7 @@ const { grid } = Astro.props;
 <div id="plank-reveal-root">
   <div
     class="plank-grid"
-    style={`grid-template-columns: ${grid.cells[0].map((cell: any) => (cell.length_mm / grid.cells[0].reduce((a: any, b: any) => a + b.length_mm, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')}; grid-template-rows: ${grid.cells.map((row: any) => (row[0].width_mm / grid.cells.map((r: any) => r[0].width_mm).reduce((a: any, b: any) => a + b, 0))).map((frac: number) => frac.toFixed(4) + 'fr').join(' ')};`}
+    style={`grid-template-columns: ${grid.cells[0].map((cell: any) => (cell.length_mm * scale).toFixed(2) + 'px').join(' ')}; grid-template-rows: ${grid.cells.map((row: any) => (row[0].width_mm * scale).toFixed(2) + 'px').join(' ')};`}
   >
     {grid.cells.map((row: any, rIdx: number) =>
       row.map((cell: any, cIdx: number) => (
