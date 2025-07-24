@@ -6,19 +6,19 @@ Tracks current work focus, recent changes, next steps, active decisions, importa
 ---
 
 ### Current Work Focus
-Establishing initial documentation, architecture, and workflow for the FloorInstallPlanner project. Setting up memory bank files and planning the first implementation steps.
+Implementing and refining the flooring layout visualization. Ensuring the grid accurately reflects input parameters and constraints, and is clear and user-friendly.
 
 ### Recent Changes
-- Created `progress.md` to track project status.
-- Reviewed and scaffolded all memory bank files.
-- Outlined initial project plan and documentation-first workflow.
+- Implemented TypeScript engine to output a grid of planks and expansion gaps.
+- Added color-coded, labeled CSS grid visualization in Astro.
+- Verified visualization renders correctly with legend and input parameters.
 
 ### Next Steps
-- Define the JSON input schema and create an example file in the public directory.
-- Document initial architecture and technology stack.
-- Plan and scaffold the TypeScript layout engine.
-- Set up Astro/CSS grid rendering for the visualization.
-- Update memory bank files as work progresses.
+- Document the visualization approach and grid structure in systemPatterns.md.
+- Update progress.md to reflect the completed visualization milestone.
+- Plan and implement additional constraints (e.g., butt joint offset, min plank length).
+- Consider enhancements: interactivity, exporting cut lists, improved styling.
+- Continue to update memory bank files as work progresses.
 
 ### Active Decisions & Considerations
 - Use AstroJS for static site generation.

@@ -26,12 +26,15 @@ Documents system architecture, key technical decisions, design patterns, compone
 
 ### Component Relationships
 - JSON input → TypeScript engine (layout calculation) → Astro page (renders grid).
-- Engine output is a data structure (e.g., 2D array) representing plank layout.
-- Astro/CSS grid consumes engine output for visualization.
+- Engine output is a 2D array of PlankCell objects, each with type (full, cut, expansion_gap), position, and size.
+- Astro/CSS grid consumes this output, mapping each cell to a color-coded `<div>` in a CSS grid.
+- Legend and tooltips provide user guidance and clarity.
 
 ### Critical Implementation Paths
 - Input validation and parsing from JSON.
 - Application of installation constraints in layout logic.
 - Calculation of plank positions, cuts, and expansion gaps.
-- Transformation of layout data into a format suitable for CSS grid rendering.
-- Visual differentiation of plank types and gaps in the UI.
+- Output: 2D array of PlankCell objects, with metadata for type, size, and position.
+- Astro page renders a CSS grid, mapping each PlankCell to a `<div>` with color and label.
+- Color-coding: blue for full planks, yellow for cut planks, gray for expansion gaps.
+- Legend and tooltips clarify cell meaning for the user.

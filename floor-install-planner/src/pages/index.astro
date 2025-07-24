@@ -36,10 +36,61 @@ try {
         <li>Min first/last row width: {input.min_first_last_row_width_mm}mm</li>
       </ul>
       <h2>Flooring Layout Visualization</h2>
-      <div>
-        {/* TODO: Render grid visualization here */}
-        <em>Visualization coming soon.</em>
-      </div>
+      {grid ? (
+        <>
+          <div style="margin-bottom: 1em;">
+            <strong>Legend:</strong>
+            <span style="display:inline-block;width:1em;height:1em;background:#b3e5fc;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Full Plank
+            <span style="display:inline-block;width:1em;height:1em;background:#ffe082;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Cut Plank
+            <span style="display:inline-block;width:1em;height:1em;background:#eee;border:1px solid #333;margin:0 0.5em 0 1em;vertical-align:middle;"></span> Expansion Gap
+          </div>
+          <div
+            style={`
+              display: grid;
+              grid-template-rows: repeat(${grid.rows}, 24px);
+              grid-template-columns: repeat(${grid.cols}, 48px);
+              gap: 1px;
+              background: #333;
+              width: max-content;
+            `}
+          >
+            {grid.cells.map((row, rIdx) =>
+              row.map((cell, cIdx) => {
+                let bg = "#fff";
+                if (cell.type === "full") bg = "#b3e5fc";
+                else if (cell.type === "cut") bg = "#ffe082";
+                else if (cell.type === "expansion_gap") bg = "#eee";
+                return (
+                  <div
+                    style={`
+                      width: 48px;
+                      height: 24px;
+                      background: ${bg};
+                      border: 1px solid #333;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 0.7em;
+                      box-sizing: border-box;
+                    `}
+                    title={
+                      cell.type === "full"
+                        ? "Full plank"
+                        : cell.type === "cut"
+                        ? `Cut plank (${cell.length_mm}mm x ${cell.width_mm}mm)`
+                        : "Expansion gap"
+                    }
+                  >
+                    {cell.type === "cut" ? "Cut" : cell.type === "expansion_gap" ? "" : ""}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
+      ) : (
+        <div>No grid data found.</div>
+      )}
     </>
   ) : (
     <div>No input data found.</div>
